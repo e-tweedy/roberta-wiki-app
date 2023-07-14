@@ -141,7 +141,7 @@ with example_container:
     for i in range(len(ex_questions)):
         with ex_cols[i]:
             st.button(
-                label = f'Try example {i+1}',
+                label = f'example {i+1}',
                 key = f'ex_button_{i+1}',
                 on_click = fill_in_example,
                 args=(i,),

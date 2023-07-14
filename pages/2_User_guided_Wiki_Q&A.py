@@ -169,7 +169,7 @@ with query_container:
     for i in range(len(ex_questions)):
         with query_cols[i]:
             st.button(
-                label = f'Try query {i+1}',
+                label = f'query {i+1}',
                 key = f'query_button_{i+1}',
                 on_click = query_example_click,
                 args=(i,),
@@ -219,7 +219,7 @@ with input_container:
     for i in range(len(ex_questions)):
         with ques_cols[i]:
             st.button(
-                label = f'Try question {i+1}',
+                label = f'question {i+1}',
                 key = f'ques_button_{i+1}',
                 on_click = question_example_click,
                 args=(i,),
