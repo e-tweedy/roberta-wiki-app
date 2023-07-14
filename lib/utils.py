@@ -246,6 +246,9 @@ class ContextRetriever:
         paragraph_data.sort(reverse=True,key=lambda p:p[1])
         
         # Grab topn best [title,paragraph] pairs sorted by bm25 score
-        topn = len(paragraph_data) if topn is None else topn
+        if topn is None:
+            topn = len(paragraph_data)//3+1
+        else:
+            topn = min(topn,len(paragraph_data))
         best_paragraphs = [[titles[p[2]],corpus[p[0]]] for p in paragraph_data[:topn]]
         return best_paragraphs

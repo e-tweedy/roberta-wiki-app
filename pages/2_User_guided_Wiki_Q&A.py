@@ -199,6 +199,7 @@ with query_container:
                 retriever = ContextRetriever()
                 retriever.get_pageids(query)
                 st.session_state['semi']['page_options'] = retriever.pageids
+                st.session_state['semi']['selected_pages'] = []
 
 with article_container:
     # Page title selection box
@@ -247,13 +248,14 @@ with input_container:
                 pages = retriever.ids_to_pages(selected_pages)
                 paragraphs = retriever.pages_to_paragraphs(pages)
                 best_paragraphs = retriever.rank_paragraphs(
-                    paragraphs, query, topn=None
+                    paragraphs, query,
+                    topn=20,
                 )
             with st.spinner("Generating response..."):
                 for paragraph in best_paragraphs:
                     input = {
                         'context':paragraph[1],
-                        'question':st.session_state['auto']['question'],
+                        'question':st.session_state['semi']['question'],
                     }
                     # Pass to QA pipeline
                     response = qa_pipeline(**input)
