@@ -246,23 +246,31 @@ with input_container:
                 retriever = ContextRetriever()
                 pages = retriever.ids_to_pages(selected_pages)
                 paragraphs = retriever.pages_to_paragraphs(pages)
-                ranked_paragraphs = retriever.rank_paragraphs(
+                best_paragraphs = retriever.rank_paragraphs(
                     paragraphs, query, topn=None
                 )
             with st.spinner("Generating response..."):
-                best_answer = ""
-                for paragraph in ranked_paragraphs:
+                for paragraph in best_paragraphs:
                     input = {
                         'context':paragraph[1],
-                        'question':st.session_state['semi']['question'],
+                        'question':st.session_state['auto']['question'],
                     }
                     # Pass to QA pipeline
                     response = qa_pipeline(**input)
+                    # Append answers and scores.  We report a score of 0
+                    # for no-answer paragraphs, so they get deprioritized
+                    # when the max is taken below
                     if response['answer']!='':
-                        best_answer = response['answer']
-                        best_context_article = paragraph[0]
-                        best_context = paragraph[1]
-                        break
+                        paragraph += [response['answer'],response['score']]
+                    else:
+                        paragraph += ['',0]
+                    
+                # Get best paragraph (max confidence score) and collect data
+                best_paragraph = max(best_paragraphs,key = lambda x:x[3])
+                best_answer = best_paragraph[2]
+                best_context_article = best_paragraph[0]
+                best_context = best_paragraph[1]
+                
                 # Update response in session state
                 if best_answer == "":
                     st.session_state['semi']['response'] = "I cannot find the answer to your question."

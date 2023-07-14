@@ -187,7 +187,6 @@ with input_container:
                 with st.spinner('Generating response...'):
                     # Loop through best_paragraph contexts
                     # looking for answer in each
-                    best_answer = ""
                     for paragraph in best_paragraphs:
                         input = {
                             'context':paragraph[1],
