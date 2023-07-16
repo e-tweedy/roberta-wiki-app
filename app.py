@@ -166,7 +166,7 @@ with intro_container:
 ```
     ''')
     st.markdown('''
-Use the menu above to navigate between tabs containing several tools:
+Use the menu at the top to navigate between tabs containing several tools:
 1. A basic Q&A tool which allows the user to ask the model to search a user-provided context paragraph for the answer to a user-provided question.
 2. A user-guided Wiki Q&A tool which allows the user to search for one or more Wikipedia pages and ask the model to search those pages for the answer to a user-provided question.
 3. An automated Wiki Q&A tool which asks the model to perform retrieve its own Wikipedia pages in order to answer the user-provided question.
