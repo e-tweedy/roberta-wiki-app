@@ -1,13 +1,13 @@
 import requests, wikipedia, re
 from rank_bm25 import BM25Okapi
-import torch
-from datasets import Dataset
-from torch.utils.data import DataLoader
-from transformers import (
-    AutoTokenizer,
-    AutoModelForQuestionAnswering,
-    pipeline,
-)
+# import torch
+# from datasets import Dataset
+# from torch.utils.data import DataLoader
+# from transformers import (
+#     AutoTokenizer,
+#     AutoModelForQuestionAnswering,
+#     pipeline,
+# )
 import streamlit as st
 import pandas as pd
 import spacy
@@ -41,12 +41,12 @@ def basic_clear_boxes():
     for field in ['question','context','response']:
         st.session_state['basic'][field] = ''
 
-def basic_ex_click(i):
+def basic_ex_click(examples, i):
     """
     Fills in the chosen example
     """
-    st.session_state['basic']['question'] = ex_questions[i][0]
-    st.session_state['basic']['context'] = ex_contexts[i]
+    st.session_state['basic']['question'] = examples[1][i][0]
+    st.session_state['basic']['context'] = examples[2][i]
 
 def semi_clear_query():
     """
@@ -65,14 +65,14 @@ def semi_clear_question():
     for field in ['question','response']:
         st.session_state['semi'][field] = ''
 
-def semi_ex_query_click(i):
+def semi_ex_query_click(examples,i):
     """
     Fills in the query example and
     populates question examples when query
     example button is clicked
     """
-    st.session_state['semi']['query'] = ex_queries[i]
-    st.session_state['semi']['ex_questions'] = ex_questions[i]
+    st.session_state['semi']['query'] = examples[0][i]
+    st.session_state['semi']['ex_questions'] = examples[1][i]
 
 def semi_ex_question_click(i):
     """
@@ -87,11 +87,11 @@ def auto_clear_boxes():
     for field in ['question','response']:
         st.session_state['auto'][field]=''
 
-def auto_ex_click(i):
+def auto_ex_click(examples,i):
     """
     Fills in the chosen example question
     """
-    st.session_state['auto']['question'] = ex_questions[i][0]
+    st.session_state['auto']['question'] = examples[1][i][0]
 
 ###########################
 ## Query helper function ##

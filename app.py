@@ -87,9 +87,10 @@ with st.spinner('Loading the model...'):
     nlp = get_spacy()
 
 # Retrieve example questions and contexts
-ex_queries, ex_questions, ex_contexts = get_examples()
+examples = get_examples()
+# ex_queries, ex_questions, ex_contexts = get_examples()
 if 'ex_questions' not in st.session_state['semi']:
-    st.session_state['semi']['ex_questions'] = len(ex_questions[0])*['']
+    st.session_state['semi']['ex_questions'] = len(examples[1][0])*['']
     
 ################################
 ### Initialize App Structure ###
@@ -189,14 +190,14 @@ Alternatively, you can try an example by clicking one of the buttons below:
     
 ### Populate example button container ###
 with basic_example_container:
-    basic_ex_cols = st.columns(len(ex_questions)+1)
-    for i in range(len(ex_questions)):
+    basic_ex_cols = st.columns(len(examples[0])+1)
+    for i in range(len(examples[0])):
         with basic_ex_cols[i]:
             st.button(
                 label = f'example {i+1}',
                 key = f'basic_ex_button_{i+1}',
                 on_click = basic_ex_click,
-                args = (i,),
+                args = (examples,i,),
             )
     with basic_ex_cols[-1]:
         st.button(
@@ -280,15 +281,15 @@ This component allows you to perform a Wikipedia search for source material to f
 ### Populate query container ###
 with semi_query_container:
     st.markdown('First submit a search query, or choose one of the examples.')
-    semi_query_cols = st.columns(len(ex_queries)+1)
+    semi_query_cols = st.columns(len(examples[0])+1)
     # Buttons for query examples
-    for i in range(len(ex_questions)):
+    for i in range(len(examples[0])):
         with semi_query_cols[i]:
             st.button(
                 label = f'query {i+1}',
                 key = f'semi_query_button_{i+1}',
                 on_click = semi_ex_query_click,
-                args=(i,),
+                args=(examples,i,),
             )
     # Button for clearning query field
     with semi_query_cols[-1]:
@@ -339,8 +340,8 @@ with semi_page_container:
 with semi_input_container:
     st.markdown('Finally submit a question for RoBERTa to answer based on the above pages or choose one of the examples.')
     # Question example buttons
-    semi_ques_cols = st.columns(len(ex_questions[0])+1)
-    for i in range(len(ex_questions)):
+    semi_ques_cols = st.columns(len(examples[0])+1)
+    for i in range(len(examples[0])):
         with semi_ques_cols[i]:
             st.button(
                 label = f'question {i+1}',
@@ -448,15 +449,15 @@ Alternatively, you can try an example by clicking one of the buttons below:
 
 ### Populate example container ###
 with auto_example_container:
-    auto_ex_cols = st.columns(len(ex_questions)+1)
+    auto_ex_cols = st.columns(len(examples[0])+1)
     # Buttons for selecting example questions
-    for i in range(len(ex_questions)):
+    for i in range(len(examples[0])):
         with auto_ex_cols[i]:
             st.button(
                 label = f'example {i+1}',
                 key = f'auto_ex_button_{i+1}',
                 on_click = auto_ex_click,
-                args=(i,),
+                args=(examples,i,),
             )
     # Button for clearing question field and response
     with auto_ex_cols[-1]:
