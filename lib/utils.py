@@ -32,7 +32,66 @@ def get_examples():
     ex_questions = [q.split(':') for q in list(examples['question'])]
     ex_contexts = list(examples['context'])
     ex_queries = list(examples['query'])
-    return ex_queries, ex_questions, ex_contexts    
+    return ex_queries, ex_questions, ex_contexts
+
+def basic_clear_boxes():
+    """
+    Clears the question, context, response
+    """
+    for field in ['question','context','response']:
+        st.session_state['basic'][field] = ''
+
+def basic_ex_click(i):
+    """
+    Fills in the chosen example
+    """
+    st.session_state['basic']['question'] = ex_questions[i][0]
+    st.session_state['basic']['context'] = ex_contexts[i]
+
+def semi_clear_query():
+    """
+    Clears the search query field
+    and page options list
+    """
+    st.session_state['semi']['query'] = ''
+    for field in ['selected_pages','page_options']:
+        st.session_state['semi'][field] = []
+
+def semi_clear_question():
+    """
+    Clears the question and response field
+    and selected pages list
+    """
+    for field in ['question','response']:
+        st.session_state['semi'][field] = ''
+
+def semi_ex_query_click(i):
+    """
+    Fills in the query example and
+    populates question examples when query
+    example button is clicked
+    """
+    st.session_state['semi']['query'] = ex_queries[i]
+    st.session_state['semi']['ex_questions'] = ex_questions[i]
+
+def semi_ex_question_click(i):
+    """
+    Fills in the question example
+    """
+    st.session_state['semi']['question'] = st.session_state['semi']['ex_questions'][i]
+
+def auto_clear_boxes():
+    """
+    Clears the response and question fields
+    """
+    for field in ['question','response']:
+        st.session_state['auto'][field]=''
+
+def auto_ex_click(i):
+    """
+    Fills in the chosen example question
+    """
+    st.session_state['auto']['question'] = ex_questions[i][0]
 
 ###########################
 ## Query helper function ##
