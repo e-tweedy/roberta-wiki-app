@@ -113,11 +113,10 @@ This component attempts to automate the Wiki-assisted extractive question-answer
 with st.expander("Click here to find out what's happening behind the scenes..."):
     st.markdown('''
     When you submit a question, the following steps are performed:
-    1. Your question is condensed into a search query which just retained nouns, verbs, numerals, and adjectives
-    2. A Wikipedia search is performed using this query, resulting in several articles
-    3. The articles from the top 3 search results are collected and split into paragraphs
-    4. The paragraphs are ranked by relevance to your question, using the [Okapi BM25 score](https://en.wikipedia.org/wiki/Okapi_BM25)
-    4. The ten most relevant paragraphs are fed as context to the RoBERTa model, from which it will attempt to extract the answer to your question.  The 'hit' having the highest confidence (prediction probability) from the model is reported as the answer.
+    1. Your question is condensed into a search query which just retains nouns, verbs, numerals, and adjectives, where part-of-speech tagging is done using the [en_core_web_sm](https://spacy.io/models/en#en_core_web_sm) pipeline in the [spaCy library](https://spacy.io/).
+    2. A Wikipedia search is performed using this query, resulting in several articles.  The articles from the top 3 search results are collected and split into paragraphs.  Wikipedia queries and article collection use the [wikipedia library](https://pypi.org/project/wikipedia/), a wrapper for the [MediaWiki API](https://www.mediawiki.org/wiki/API).
+    4. The paragraphs are ranked in descending order of relevance to the query, using the [Okapi BM25 score](https://en.wikipedia.org/wiki/Okapi_BM25) as implemented in the [rank_bm25 library](https://github.com/dorianbrown/rank_bm25).
+    5. The ten most relevant paragraphs are fed as context to the RoBERTa model, from which it will attempt to extract the answer to your question.  The 'hit' having the highest confidence (prediction probability) from the model is reported as the answer.
     ''')
 
 st.markdown('''
@@ -178,12 +177,14 @@ with input_container:
                     # Retrieve ids from top 3 results
                     retriever = ContextRetriever()
                     retriever.get_pageids(query,topn=3)
+                    st.write(retriever.pageids)
                     # Retrieve pages then paragraphs
                     retriever.get_all_pages()
                     retriever.get_all_paragraphs()
                     # Get top 10 paragraphs, ranked by relevance to query
                     best_paragraphs = retriever.rank_paragraphs(retriever.paragraphs, query)
-                
+
+                st.write(best_paragraphs)
                 with st.spinner('Generating response...'):
                     # Loop through best_paragraph contexts
                     # looking for answer in each

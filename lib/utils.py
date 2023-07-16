@@ -207,7 +207,8 @@ class ContextRetriever:
     def rank_paragraphs(self,paragraphs,query,topn=10):
         """
         Ranks the elements of paragraphs in descending order
-        by relevance to query using BM25 Okapi, and returns top topn results
+        by relevance to query using BM25 Okapi, and returns top
+        topn results
         Parameters:
         -----------
         paragraphs : dict
@@ -218,7 +219,8 @@ class ContextRetriever:
             The query to use in ranking paragraphs by relevance
         topn : int or None
             The number of most relevant paragraphs to return
-            If None, will return all paragraphs (ranked)
+            If None, will return roughly the top 1/4 of the
+            paragraphs
         Returns:
         --------
         best_paragraphs : list(list(str,str))
@@ -246,9 +248,7 @@ class ContextRetriever:
         paragraph_data.sort(reverse=True,key=lambda p:p[1])
         
         # Grab topn best [title,paragraph] pairs sorted by bm25 score
-        if topn is None:
-            topn = len(paragraph_data)//3+1
-        else:
-            topn = min(topn,len(paragraph_data))
+        topn = len(paragraph_data)//4+1 if topn is None else min(topn,len(paragraph_data))
+
         best_paragraphs = [[titles[p[2]],corpus[p[0]]] for p in paragraph_data[:topn]]
         return best_paragraphs

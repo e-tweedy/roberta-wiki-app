@@ -140,15 +140,13 @@ st.header('User-guided Wiki Q&A')
 st.markdown('''
 This component allows you to perform a Wikipedia search for source material to feed as contexts to the RoBERTa question-answering model.
 ''')
-# with st.expander("Click here to find out what's happening behind the scenes..."):
-#     st.markdown('''
-#     When you submit a question, the following steps are performed:
-#     1. Your question is condensed into a search query which just retained nouns, verbs, numerals, and adjectives
-#     2. A Wikipedia search is performed using this query, resulting in several articles
-#     3. The articles are collected and split into paragraphs
-#     4. The paragraphs are ranked by relevance to your question, using the [Okapi BM25 score](https://en.wikipedia.org/wiki/Okapi_BM25)
-#     4. The ten most relevant paragraphs are fed as context to the RoBERTa model, from which it will attempt to extract the answer to your question.  The first 'hit' is reported.
-#     ''')
+with st.expander("Click here to find out what's happening behind the scenes..."):
+    st.markdown('''
+    1. A Wikipedia search is performed using your query, resulting in a list of articles which then populate the drop-down menu.
+    2. The articles you select are retrieved and broken up into paragraphs.  Wikipedia queries and article collection use the [wikipedia library](https://pypi.org/project/wikipedia/), a wrapper for the [MediaWiki API](https://www.mediawiki.org/wiki/API).
+    3. The paragraphs are ranked in descending order of relevance to your question, using the [Okapi BM25 score](https://en.wikipedia.org/wiki/Okapi_BM25) as implemented in the [rank_bm25 library](https://github.com/dorianbrown/rank_bm25).
+    4. Among these ranked paragraphs, approximately the top 25% are fed as context to the RoBERTa model, from which it will attempt to extract the answer to your question.  The 'hit' having the highest confidence (prediction probability) from the model is reported as the answer.
+    ''')
 
 # Generate containers in order
 query_container = st.container()
@@ -241,15 +239,16 @@ with input_container:
             placeholder='Enter your question here.',
         )
         question_submitted = st.form_submit_button("Submit")
-        if question_submitted and len(question)>0:
+        if question_submitted and len(question)>0 and len(st.session_state['semi']['selected_pages'])>0:
+            st.session_state['semi']['response'] = ''
             st.session_state['semi']['question'] = question
             with st.spinner("Retrieving documentation..."):
                 retriever = ContextRetriever()
                 pages = retriever.ids_to_pages(selected_pages)
                 paragraphs = retriever.pages_to_paragraphs(pages)
                 best_paragraphs = retriever.rank_paragraphs(
-                    paragraphs, query,
-                    topn=20,
+                    paragraphs, question,
+                    topn=None,
                 )
             with st.spinner("Generating response..."):
                 for paragraph in best_paragraphs:
@@ -266,7 +265,6 @@ with input_container:
                         paragraph += [response['answer'],response['score']]
                     else:
                         paragraph += ['',0]
-                    
                 # Get best paragraph (max confidence score) and collect data
                 best_paragraph = max(best_paragraphs,key = lambda x:x[3])
                 best_answer = best_paragraph[2]
