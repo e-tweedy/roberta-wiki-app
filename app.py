@@ -12,6 +12,7 @@ from lib.utils import (
     ContextRetriever,
     get_examples,
     generate_query,
+    generate_answer,
 )
 
 #################################
@@ -122,9 +123,9 @@ with tabs[3]:
     auto_input_container = st.container()
     auto_response_container = st.container()
 
-#####################
-### Tab - Welcome ###
-#####################
+##############################
+### Populate tab - Welcome ###
+##############################
 
 with intro_container:
     # Intro text
@@ -171,9 +172,9 @@ Use the menu on the left side to navigate between different app components:
 3. An automated Wiki Q&A tool which asks the model to perform retrieve its own Wikipedia pages in order to answer the user-provided question.
     ''')
 
-#######################
-### Tab - basic Q&A ###
-#######################
+################################
+### Populate tab - basic Q&A ###
+################################
 
 from lib.utils import basic_clear_boxes, basic_ex_click
 
@@ -253,9 +254,9 @@ with basic_input_container:
 with basic_response_container:
     st.write(st.session_state['basic']['response'])
             
-########################
-### Tab - guided Q&A ###
-########################
+#################################
+### Populate tab - guided Q&A ###
+#################################
 
 from lib.utils import (
     semi_ex_query_click,
@@ -380,49 +381,21 @@ with semi_input_container:
                     paragraphs, question,
                 )     
             with st.spinner("Generating response..."):
-                # For each paragraph, format input to QA pipeline...
-                for paragraph in best_paragraphs:
-                    input = {
-                        'context':paragraph[1],
-                        'question':st.session_state['semi']['question'],
-                    }
-                    # ...and pass to QA pipeline
-                    response = qa_pipeline(**input)
-                    # Append answers and scores.  Report score of
-                    # zero for paragraphs without answer, so they are
-                    # deprioritized when the max is taken below
-                    if response['answer']!='':
-                        paragraph += [response['answer'],response['score']]               
-                    else:
-                        paragraph += ['',0]
-                # Get paragraph with max confidence score and collect data
-                best_paragraph = max(best_paragraphs,key = lambda x:x[3])
-                best_answer = best_paragraph[2]
-                best_context_page = best_paragraph[0]
-                best_context = best_paragraph[1]
+                # Generate a response and update the session state
+                response = generate_answer(
+                    pipeline = qa_pipeline,
+                    paragraphs = best_paragraphs,
+                    question = st.session_state['semi']['question'],
+                )
+                st.session_state['semi']['response'] = response
                 
-                # Update response in session state
-                if best_answer == "":
-                    st.session_state['semi']['response'] = "I cannot find the answer to your question."
-                else:
-                    st.session_state['semi']['response'] = f"""
-                    My answer is: {best_answer}
-                    
-                    ...and here's where I found it:
-                    
-                    Page title: {best_context_page}
-
-                    Paragraph containing answer:
-
-                    {best_context}
-                    """
 ### Populate response container ###
 with semi_response_container:
     st.write(st.session_state['semi']['response'])
 
-###########################
-### Tab - automated Q&A ###
-###########################
+####################################
+### Populate tab - automated Q&A ###
+####################################
 
 from lib.utils import auto_ex_click, auto_clear_boxes
     
@@ -498,43 +471,13 @@ with auto_input_container:
                     # Get top 10 paragraphs, ranked by relevance to query
                     best_paragraphs = retriever.rank_paragraphs(retriever.paragraphs, query)
                 with st.spinner('Generating response...'):
-                        # For each paragraph, format input to QA pipeline...
-                    for paragraph in best_paragraphs:
-                        input = {
-                            'context':paragraph[1],
-                            'question':st.session_state['auto']['question'],
-                        }
-                        # ...and pass to QA pipeline
-                        response = qa_pipeline(**input)
-                        # Append answers and scores.  Report score of
-                        # zero for paragraphs without answer, so they are
-                        # deprioritized when the max is taken below
-                        if response['answer']!='':
-                            paragraph += [response['answer'],response['score']]
-                        else:
-                            paragraph += ['',0]
-                    
-                    # Get paragraph with max confidence score and collect data
-                    best_paragraph = max(best_paragraphs,key = lambda x:x[3])
-                    best_answer = best_paragraph[2]
-                    best_context_article = best_paragraph[0]
-                    best_context = best_paragraph[1]
-                    
-                    # Update response in session state
-                    if best_answer == "":
-                        st.session_state['auto']['response'] = "I cannot find the answer to your question."
-                    else:
-                        st.session_state['auto']['response'] = f"""
-                            My answer is: {best_answer}
-                    
-                            ...and here's where I found it:
-                    
-                            Article title: {best_context_article}
-
-                            Paragraph containing answer:
-
-                            {best_context}
-                        """
+                    # Generate a response and update the session state
+                    response = generate_answer(
+                        pipeline = qa_pipeline,
+                        paragraphs = best_paragraphs,
+                        question = st.session_state['auto']['question'],
+                    )
+                    st.session_state['auto']['response'] = response
 ### Populate response container ###
 with auto_response_container:
     st.write(st.session_state['auto']['response'])

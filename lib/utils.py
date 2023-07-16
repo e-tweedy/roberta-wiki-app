@@ -1,13 +1,5 @@
 import requests, wikipedia, re
 from rank_bm25 import BM25Okapi
-# import torch
-# from datasets import Dataset
-# from torch.utils.data import DataLoader
-# from transformers import (
-#     AutoTokenizer,
-#     AutoModelForQuestionAnswering,
-#     pipeline,
-# )
 import streamlit as st
 import pandas as pd
 import spacy
@@ -311,3 +303,62 @@ class ContextRetriever:
 
         best_paragraphs = [[titles[p[2]],corpus[p[0]]] for p in paragraph_data[:topn]]
         return best_paragraphs
+
+def generate_answer(pipeline,paragraphs, question):
+    """
+    Generate an answer using a question-answer pipeline
+    Parameters:
+    -----------
+    pipeline : transformers.QuestionAnsweringPipeline
+        The question answering pipeline object
+    paragraphs : list(list(str,str))
+        The k-th entry is a list [title,paragraph] consisting
+        of a context paragraph and the title of the page from which the
+        paragraph was sourced
+    question : str
+        A question that is to be answered based on context given
+        in the entries of paragraphs
+
+    Returns:
+    --------
+    response : str
+        A response indicating the answer that was discovered,
+        or indicating that no answer could be found.
+    """
+    # For each paragraph, format input to QA pipeline...
+    for paragraph in paragraphs:
+        input = {
+            'context':paragraph[1],
+            'question':question,
+        }
+        # ...and pass to QA pipeline
+        output = pipeline(**input)
+        # Append answers and scores.  Report score of
+        # zero for paragraphs without answer, so they are
+        # deprioritized when the max is taken below
+        if output['answer']!='':
+            paragraph += [output['answer'],output['score']]               
+        else:
+            paragraph += ['',0]
+    # Get paragraph with max confidence score and collect data
+    best_paragraph = max(paragraphs,key = lambda x:x[3])
+    best_answer = best_paragraph[2]
+    best_context_page = best_paragraph[0]
+    best_context = best_paragraph[1]
+                
+    # Update response in session state
+    if best_answer == "":
+        response = "I cannot find the answer to your question."
+    else:
+        response = f"""
+            My answer is: {best_answer}
+                    
+            ...and here's where I found it:
+                    
+            Page title: {best_context_page}
+
+            Paragraph containing answer:
+
+            {best_context}
+            """
+    return response
