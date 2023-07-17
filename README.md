@@ -1,6 +1,6 @@
 ## RoBERTa Q&A with Wiki tools
 
-This is a streamlit app which demonstrates the answer-retrieval capabilities of a fine-tuned RoBERTa (Robustly optimized Bidirectional Encoder Representations from Transformers) model.  [Click here to visit the 🤗 model card](https://huggingface.co/etweedy/roberta-base-squad-v2) to see more details about this model or [click here to visit a 🤗 space hosting the app](https://huggingface.co/spaces/etweedy/roberta-squad-v2) to try it out in the browser.
+This is a streamlit app which demonstrates the answer-retrieval capabilities of a fine-tuned RoBERTa (Robustly optimized Bidirectional Encoder Representations from Transformers) model.  [Click here to visit the 🤗 model card](https://huggingface.co/etweedy/roberta-base-squad-v2) to see more details about this model or [click here to visit a 🤗 space hosting the app](https://huggingface.co/spaces/etweedy/roberta-wiki) to try it out in the browser.
 
 * The model is a fine-tuned version of [roberta-base for QA](https://huggingface.co/roberta-base)
 * It was fine-tuned for context-based extractive question answering on the [SQuAD v2 dataset](https://huggingface.co/datasets/squad_v2), a dataset of English-language context-question-answer triples designed for extractive question answering training and benchmarking.
